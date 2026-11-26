@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Pega aquí la URL de tu Apps Script (instrucciones en google-apps-script.gs, en la raíz del proyecto)
-const URL_RESPUESTAS = '';
+// Apps Script que guarda las respuestas en la planilla (instrucciones en google-apps-script.gs)
+const URL_RESPUESTAS = 'https://script.google.com/macros/s/AKfycbxJgCiyC24FvmBMO2h7V1ia9AOOay1oNg7U3rKc7oZvMZRxjrc7rCADPbt9PhYXUFYj/exec';
 const CUOTA = 2000;
 const pesos = (n) => '$' + Math.round(n).toLocaleString('es-CL');
 
