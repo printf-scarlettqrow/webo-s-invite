@@ -953,6 +953,53 @@ body::after {
 @keyframes traza { to { stroke-dashoffset: 0; } }
 .inscripcion--lista .inscripcion__titulo { margin-top: 14px; }
 
+/* ---------- Puntos extra: papel claro entre dos secciones oscuras ---------- */
+.extras { padding: 72px var(--margen) 80px; }
+.extras__titulo { display: grid; font-size: clamp(3.5rem, 18cqi, 6.5rem); letter-spacing: .01em; line-height: .88; }
+.extras__titulo span:last-child { justify-self: end; color: #6f3be0; }
+.js .extras__titulo span[data-r] { transform: translateX(-30%); transition-duration: 900ms; }
+.js .extras__titulo span[data-r]:last-child { transform: translateX(30%); }
+.js .extras__titulo span[data-r].dentro { transform: none; }
+.extras__lead { margin-top: 26px; max-width: 30ch; font-size: clamp(1.15rem, 5cqi, 1.4rem); line-height: 1.4; }
+.extras__lead strong { font-weight: 800; background: linear-gradient(rgb(124 58 237 / .3), rgb(124 58 237 / .3)) 0 85% / 100% .35em no-repeat; }
+
+/* Cada desafío: nombre grande, explicación y un sello "+pts" que se estampa al aparecer */
+.desafios { list-style: none; margin: 36px 0 0; padding: 0; display: grid; }
+.desafio {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+  border-top: 2px dashed rgb(11 7 16 / .25);
+}
+.desafio:last-child { border-bottom: 2px dashed rgb(11 7 16 / .25); }
+.desafio__nombre { margin: 0; font-size: clamp(1.75rem, 8.5cqi, 2.6rem); font-weight: 900; line-height: .95; letter-spacing: .01em; text-transform: uppercase; }
+.desafio__texto { margin-top: 10px; font-size: 1.0625rem; line-height: 1.4; }
+.desafio__nota { margin-top: 4px; font-family: "Reenie Beanie", cursive; font-size: 1.75rem; line-height: 1; color: #6f3be0; transform: rotate(-3deg); transform-origin: left; }
+.sello {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 92px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  transform: rotate(-10deg);
+  box-shadow: inset 0 0 0 4px #7c3aed, inset 0 0 0 6px rgb(255 255 255 / .55);
+}
+.sello small { margin-top: 4px; font-size: .625rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.desafio:nth-child(2) .sello { transform: rotate(8deg); background: var(--tinta); box-shadow: inset 0 0 0 4px var(--tinta), inset 0 0 0 6px rgb(255 255 255 / .4); }
+/* El sello se estampa: entra grande y girado, y cae en su lugar con un golpe */
+.js .desafio[data-r] .sello { opacity: 0; transform: rotate(-35deg) scale(1.8); transition: opacity 150ms ease .35s, transform 450ms cubic-bezier(.34, 1.56, .64, 1) .35s; }
+.js .desafio[data-r].dentro .sello { opacity: 1; transform: rotate(-10deg); }
+.js .desafio[data-r].dentro:nth-child(2) .sello { transform: rotate(8deg); }
+
 /* ---------- Nos vemos allá ---------- */
 .nosvemos {
   position: relative;
@@ -1047,6 +1094,187 @@ body::after {
   .arriba:hover span { transform: translateY(-3px); }
 }
 
+/* ---------- Easter egg: círculo semi visible con una calavera pixel ---------- */
+.secreto,
+.doom-salir {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(243 238 250 / .05);
+  box-shadow: inset 0 0 0 1.5px rgb(199 178 239 / .28);
+  color: rgb(243 238 250 / .38);
+  cursor: pointer;
+  transition: color 250ms ease, box-shadow 250ms ease, transform 140ms var(--ease-out);
+}
+.secreto svg, .doom-salir svg { width: 16px; height: 16px; image-rendering: pixelated; }
+.secreto {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 26px;
+  height: 26px;
+  background: rgb(243 238 250 / .03);
+  box-shadow: inset 0 0 0 1px rgb(199 178 239 / .16);
+  color: rgb(243 238 250 / .22);
+}
+.secreto svg { width: 11px; height: 11px; }
+.secreto:active, .doom-salir:active { transform: scale(.9); }
+@media (hover: hover) and (pointer: fine) {
+  .secreto:hover { color: #39ff14; box-shadow: inset 0 0 0 1.5px #39ff14; }
+}
+/* En modo DOOM, el mismo círculo queda fijo abajo para salir */
+.doom-salir {
+  position: fixed;
+  z-index: 85;
+  right: max(12px, calc(50vw - 260px + 12px));
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  background: rgb(0 0 0 / .6);
+  box-shadow: inset 0 0 0 1.5px #39ff14;
+  color: #39ff14;
+}
+
+/* ---------- Modo DOOM: verde fósforo, letra pixel y todo glitcheado ---------- */
+html.doom { background: #000; }
+html.doom .columna {
+  filter: hue-rotate(200deg) saturate(1.7) contrast(1.15);
+  animation: falla 3.2s steps(1) infinite;
+}
+html.doom .columna,
+html.doom .columna * {
+  font-family: "VT323", monospace !important;
+  font-size-adjust: .62; /* la letra pixel es más chica: la igualamos al tamaño de la normal */
+  letter-spacing: 0 !important;
+  font-stretch: 100% !important;
+}
+/* Texto con los canales de color corridos, como señal dañada */
+html.doom .columna :is(h1, h2, h3, p, a, button, dd, dt, li, span) {
+  text-shadow: -2px 0 rgb(255 0 90 / .55), 2px 0 rgb(0 255 220 / .5);
+}
+/* Tirones de imagen cada pocos segundos: casi siempre quieto, y de pronto se rompe */
+@keyframes falla {
+  0%, 86%, 100% { transform: none; clip-path: none; }
+  87% { transform: translate(-5px, 0) skewX(-4deg); clip-path: inset(12% 0 55% 0); }
+  89% { transform: translate(6px, 2px); clip-path: inset(48% 0 20% 0); }
+  91% { transform: translate(-2px, -2px) skewX(3deg); clip-path: none; }
+  93% { transform: translate(3px, 0); clip-path: inset(70% 0 4% 0); }
+  95% { transform: none; clip-path: none; }
+}
+/* Líneas de barrido CRT y una banda de interferencia que baja por la pantalla */
+html.doom body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / .3) 0 1px, transparent 1px 3px);
+  animation: crt 120ms steps(2) infinite;
+}
+@keyframes crt { 50% { opacity: .8; } }
+.doom-ruido {
+  position: fixed;
+  z-index: 71;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 90px;
+  pointer-events: none;
+  background: url("/assets/grano.png");
+  opacity: .22;
+  mix-blend-mode: screen;
+  animation: banda 2.6s linear infinite;
+}
+@keyframes banda { from { transform: translateY(-100px); } to { transform: translateY(110vh); } }
+/* El cambio de modo entra con un tirón fuerte */
+html.doom-glitch .columna { animation: tiron 550ms steps(6) both; }
+@keyframes tiron {
+  0%   { transform: none; }
+  20%  { transform: translate(-6px, 2px) skewX(-6deg); clip-path: inset(10% 0 30% 0); }
+  40%  { transform: translate(5px, -3px); clip-path: inset(45% 0 5% 0); }
+  60%  { transform: translate(-3px, 0) skewX(4deg); clip-path: inset(0 0 60% 0); }
+  80%  { transform: translate(2px, 2px); clip-path: inset(20% 0 20% 0); }
+  100% { transform: none; clip-path: inset(0); }
+}
+
+/* Mensaje de secreto encontrado, al estilo DOOM: para sacarle pantallazo */
+.doom-aviso {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / .78);
+  font-family: "VT323", monospace;
+  animation: aviso-entra 400ms steps(4) both;
+}
+@keyframes aviso-entra { from { opacity: 0; } }
+.doom-aviso__caja {
+  width: min(100%, 440px);
+  padding: 26px 22px 22px;
+  background: #0b0d08;
+  box-shadow: inset 0 0 0 3px #39ff14, inset 0 0 0 6px #0b0d08, inset 0 0 0 8px #1f7a10;
+  color: #d8ffd0;
+  text-align: center;
+}
+.doom-aviso__titulo {
+  font-size: 2.75rem;
+  line-height: 1;
+  color: #ffdf3a;
+  text-transform: uppercase;
+  text-shadow: -2px 0 #ff1f1f, 2px 2px 0 #000;
+  animation: titila-doom .9s steps(2) infinite;
+}
+@keyframes titila-doom { 50% { opacity: .55; } }
+.doom-aviso__texto { margin-top: 14px; font-size: 1.5rem; line-height: 1.15; }
+.doom-aviso__texto strong { color: #39ff14; font-weight: 400; }
+.doom-aviso__sello { margin-top: 16px; font-size: 1.1rem; color: #7dbb6f; }
+.doom-aviso__ok {
+  margin-top: 18px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  background: #39ff14;
+  color: #000;
+  font: inherit;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.doom-aviso__ok:active { transform: scale(.95); }
+.doom-aviso__texto[for] { display: block; }
+.doom-aviso__campo {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: inset 0 0 0 2px #1f7a10;
+  color: #39ff14;
+  font: inherit;
+  font-size: 1.75rem;
+  text-align: center;
+  text-transform: uppercase;
+  caret-color: #39ff14;
+}
+.doom-aviso__campo:focus { outline: none; box-shadow: inset 0 0 0 2px #39ff14; }
+.doom-aviso__sello:empty::before { content: "\00a0"; }
+.doom-aviso__acciones { display: flex; justify-content: center; align-items: center; gap: 14px; }
+.doom-aviso__no { margin-top: 18px; min-height: 44px; padding: 0 12px; border: 0; background: none; color: #7dbb6f; font: inherit; font-size: 1.3rem; text-transform: uppercase; cursor: pointer; }
+/* Respuesta incorrecta: la caja tiembla y el mensaje se pone rojo */
+.doom-aviso__caja--error { animation: niega 380ms steps(6); }
+.doom-aviso__caja--error .doom-aviso__sello { color: #ff3b1f; }
+@keyframes niega {
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(9px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+}
+
 /* ---------- Entradas al hacer scroll ---------- */
 .js [data-r] {
   opacity: 0;
@@ -1079,6 +1307,10 @@ body::after {
   .js .juegos__frase[data-r] .cinta { transform: rotate(-3deg); opacity: 1; }
   .js .juegos__mano[data-r] { clip-path: none; }
   .js .pozo[data-r] { transform: rotate(-1.5deg); }
+  .js .desafio[data-r] .sello { opacity: 1; transform: rotate(-10deg); }
+  .js .desafio[data-r]:nth-child(2) .sello { transform: rotate(8deg); }
+  html.doom body::before, html.doom .columna, .doom-ruido, .doom-aviso__titulo { animation: none; }
+  .doom-ruido { display: none; }
   .inscripcion--lista, .inscripcion__check { animation: none; stroke-dashoffset: 0; }
   html { scroll-behavior: auto; }
 }

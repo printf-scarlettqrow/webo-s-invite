@@ -145,8 +145,80 @@ function useEntradas() {
   }, []);
 }
 
+// Easter egg: el círculo escondido al final pone toda la página en modo DOOM y da puntos al equipo
+function useModoDoom() {
+  const [doom, setDoom] = useState(false);
+  const [aviso, setAviso] = useState(null); // hora en que se descubrió, para el pantallazo
+  const alternar = () => {
+    const raiz = document.documentElement;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      raiz.classList.add('doom-glitch');
+      setTimeout(() => raiz.classList.remove('doom-glitch'), 550);
+    }
+    setDoom((d) => {
+      if (!d) setAviso(new Date().toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }));
+      return !d;
+    });
+  };
+  useEffect(() => {
+    document.documentElement.classList.toggle('doom', doom);
+  }, [doom]);
+  return { doom, alternar, aviso, cerrarAviso: () => setAviso(null) };
+}
+
+// Calavera pixel 8×8 para el botón secreto
+function Calavera() {
+  return (
+    <svg viewBox="0 0 8 8" aria-hidden="true" shapeRendering="crispEdges">
+      <path fill="currentColor" d="M2 0h4v1h1v1h1v3H7v1H6v2H5V7H3v1H2V6H1V5H0V2h1V1h1zM2 3v1h1V3zm3 0v1h1V3z" />
+    </svg>
+  );
+}
+
+// Pregunta para entrar al modo DOOM: vale "doomsday" escrito como sea (con o sin "avengers", tildes o mayúsculas)
+const esRespuestaCorrecta = (texto) =>
+  texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '').includes('doomsday');
+
+function PreguntaSecreta({ onAcierto, onCerrar }) {
+  const [respuesta, setRespuesta] = useState('');
+  const [error, setError] = useState(false);
+  const enviar = (e) => {
+    e.preventDefault();
+    if (esRespuestaCorrecta(respuesta)) return onAcierto();
+    // Reinicia el temblor en cada intento fallido; el mensaje de error queda visible
+    setError(false);
+    requestAnimationFrame(() => setError(true));
+  };
+  return (
+    <div className="doom-aviso" role="dialog" aria-modal="true" aria-labelledby="doom-pregunta">
+      <form className={`doom-aviso__caja${error ? ' doom-aviso__caja--error' : ''}`} onSubmit={enviar}>
+        <p className="doom-aviso__titulo" id="doom-pregunta">Acceso restringido</p>
+        <label className="doom-aviso__texto" htmlFor="doom-respuesta">¿Cuál es la película que más espera Izzi?</label>
+        <input
+          id="doom-respuesta"
+          className="doom-aviso__campo"
+          type="text"
+          autoComplete="off"
+          autoCapitalize="none"
+          value={respuesta}
+          onChange={(e) => setRespuesta(e.target.value)}
+          aria-describedby="doom-error"
+          autoFocus
+        />
+        <p className="doom-aviso__sello" id="doom-error" aria-live="polite">{error ? 'Nop. No era esa. Intenta otra vez.' : ' '}</p>
+        <div className="doom-aviso__acciones">
+          <button className="doom-aviso__ok" type="submit">[ Entrar ]</button>
+          <button className="doom-aviso__no" type="button" onClick={onCerrar}>Salir</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function App() {
   useEntradas();
+  const { doom, alternar: alternarDoom, aviso, cerrarAviso } = useModoDoom();
+  const [preguntando, setPreguntando] = useState(false);
 
   return (
     <>
@@ -213,6 +285,31 @@ export default function App() {
 
         <Juegos />
 
+        <section className="papel extras" id="puntos-extra" aria-labelledby="t-extras">
+          <h2 className="gigante extras__titulo" id="t-extras"><span data-r>Puntos</span><span data-r>extra</span></h2>
+          <p className="extras__lead" data-r>
+            Además de los juegos, hay desafíos con premio. Quien gane, <strong>suma puntos para su equipo</strong>.
+          </p>
+
+          <ul className="desafios">
+            <li className="desafio" data-r>
+              <div>
+                <h3 className="desafio__nombre">El mejor vestido</h3>
+                <p className="desafio__texto">Quien llegue mejor vestido gana puntos para su equipo y un premio sorpresa.</p>
+                <p className="desafio__nota">(no esperen mucho xd)</p>
+              </div>
+              <span className="sello" aria-hidden="true">+pts<small>+ premio</small></span>
+            </li>
+            <li className="desafio" data-r>
+              <div>
+                <h3 className="desafio__nombre">La mesa pide</h3>
+                <p className="desafio__texto">La mesa pide algo y el primero en traerlo gana puntos para su equipo.</p>
+              </div>
+              <span className="sello" aria-hidden="true">+pts</span>
+            </li>
+          </ul>
+        </section>
+
         <section className="nosvemos" id="nos-vemos" aria-labelledby="t-nosvemos">
           <div className="nosvemos__fondo" aria-hidden="true">
             <img src="assets/izzi.jpg" alt="" width="900" height="1599" loading="lazy" />
@@ -240,8 +337,32 @@ export default function App() {
               <span aria-hidden="true">↑</span> Volver arriba
             </button>
           </div>
+          <button className="secreto" type="button" aria-label="Modo secreto" aria-pressed={doom} onClick={() => (doom ? alternarDoom() : setPreguntando(true))}>
+            <Calavera />
+          </button>
         </section>
       </main>
+
+      {preguntando && (
+        <PreguntaSecreta onAcierto={() => { setPreguntando(false); alternarDoom(); }} onCerrar={() => setPreguntando(false)} />
+      )}
+      {doom && <div className="doom-ruido" aria-hidden="true" />}
+      {doom && (
+        <button className="doom-salir" type="button" aria-label="Salir del modo DOOM" onClick={alternarDoom}>
+          <Calavera />
+        </button>
+      )}
+      {doom && aviso && (
+        <div className="doom-aviso" role="dialog" aria-modal="true" aria-labelledby="doom-titulo">
+          <div className="doom-aviso__caja">
+            <p className="doom-aviso__titulo" id="doom-titulo">¡Secreto encontrado!</p>
+            <p className="doom-aviso__texto">Tu equipo ya ganó <strong>puntos extra</strong> desde ahora.</p>
+            <p className="doom-aviso__texto">Saca un pantallazo de este mensaje y muéstramelo en la fiesta para anotarlos.</p>
+            <p className="doom-aviso__sello">IZZI·24 · {aviso}</p>
+            <button className="doom-aviso__ok" type="button" onClick={cerrarAviso} autoFocus>[ Listo ]</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
