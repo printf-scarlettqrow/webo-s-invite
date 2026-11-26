@@ -196,10 +196,8 @@ body::after {
   line-height: .85;
   letter-spacing: -.02em;
   color: var(--blanco);
-  /* Derrite una palabra en la otra: desenfoque + contraste */
-  filter: contrast(14);
-  background: var(--negro);
-  mix-blend-mode: screen;
+  /* Una palabra se derrite en la otra solo con desenfoque y opacidad: sin fondo ni mezcla,
+     que en algunos celulares dejaban un recuadro oscuro alrededor */
 }
 .nombre span { grid-area: 1 / 1; text-align: center; padding: .12em 0; }
 .nombre__a { font-size: clamp(6rem, 33cqi, 10.5rem); animation: derrite-a 7s var(--ease-in-out) infinite; }
